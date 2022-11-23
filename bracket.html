@@ -75,7 +75,7 @@ let groups =
     'C' : [['ARG','KSA',1,2],['MEX','POL',0,0],['POL','KSA','',''],['ARG','MEX','',''],['POL','ARG','',''],['KSA','MEX','','']],
     'D' : [['DEN','TUN',0,0],['FRA','AUS',4,1],['TUN','AUS','',''],['FRA','DEN','',''],['TUN','FRA','',''],['AUS','DEN','','']],
     'E' : [['GER','JPN',1,2],['ESP','CRC',7,0],['JPN','CRC','',''],['ESP','GER','',''],['JPN','ESP','',''],['CRC','GER','','']],
-    'F' : [['MAR','CRO',0,0],['BEL','CAN','',''],['BEL','MAR','',''],['CRP','CAN','',''],['CRO','BEL','',''],['CAN','MAR','','']],
+    'F' : [['MAR','CRO',0,0],['BEL','CAN',1,0],['BEL','MAR','',''],['CRP','CAN','',''],['CRO','BEL','',''],['CAN','MAR','','']],
     'G' : [['SUI','CMR','',''],['BRA','SRB','',''],['CMR','SRB','',''],['BRA','SUI','',''],['CMR','BRA','',''],['SRB','SUI','','']],
     'H' : [['URU','KOR','',''],['POR','GHA','',''],['KOR','GHA','',''],['POR','URU','',''],['KOR','POR','',''],['GHA','URU','','']]
 };
@@ -158,6 +158,8 @@ $(document).ready(main);
 
 function main()
 {
+    populate_results();
+
     for(const player in players)
     {
         console.log("Adding player", player);
@@ -216,11 +218,19 @@ function get_player_group_html(player, group)
     return(html);
 }
 
+function populate_results()
+{
+
+}
+
 </script>
 
 </head>
 
 <body>
+
+    <div id='results'>
+    </div>
 
     <div id='playertables'>
     </div>
@@ -228,4 +238,3 @@ function get_player_group_html(player, group)
 </body>
 
 </html>
-

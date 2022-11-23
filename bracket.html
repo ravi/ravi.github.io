@@ -1,0 +1,231 @@
+
+<html>
+
+<head>
+
+<style type='text/css'>
+
+BODY
+{
+    font-family: Avenir, Montserrat, sans-serif;
+    padding: 20px;
+}
+
+H1
+{
+    color: #39f;
+    border-bottom: 1px solid #999;
+}
+
+H2
+{
+    padding-bottom: 10px;
+    border-bottom: 2px solid #999;
+}
+
+.grouptable
+{
+    float: left;
+    margin-right: 30px;
+}
+
+.grouptable TD
+{
+    padding: 2px 5px;
+    border-bottom: 1px solid #999;
+    text-align: center;
+}
+
+.groupheader
+{
+    font-weight: bold;
+}
+
+.resright
+{
+    background-color: #ddffdd;
+}
+
+.reswrong
+{
+    background-color: #ffdddd;
+}
+
+.goalsright
+{
+    color: #009900;
+    font-weight: bold;
+}
+
+.goalswrong
+{
+    color: #ff5555;
+}
+
+</style>
+
+<script type='text/javascript' src='https://code.jquery.com/jquery-3.6.1.min.js'></script>
+
+<script>
+
+let groups =
+{
+    'A' : [['QAT','ECU',0,2],['SEN','NED',0,2],['QAT','SEN','',''],['NED','ECU','',''],['NED','QAT','',''],['ECU','SEN','','']],
+    'B' : [['ENG','IRN',6,2],['USA','WAL',1,1],['WAL','IRN','',''],['ENG','USA','',''],['WAL','ENG','',''],['IRN','USA','','']],
+    'C' : [['ARG','KSA',1,2],['MEX','POL',0,0],['POL','KSA','',''],['ARG','MEX','',''],['POL','ARG','',''],['KSA','MEX','','']],
+    'D' : [['DEN','TUN',0,0],['FRA','AUS',4,1],['TUN','AUS','',''],['FRA','DEN','',''],['TUN','FRA','',''],['AUS','DEN','','']],
+    'E' : [['GER','JPN',1,2],['ESP','CRC',7,0],['JPN','CRC','',''],['ESP','GER','',''],['JPN','ESP','',''],['CRC','GER','','']],
+    'F' : [['MAR','CRO',0,0],['BEL','CAN','',''],['BEL','MAR','',''],['CRP','CAN','',''],['CRO','BEL','',''],['CAN','MAR','','']],
+    'G' : [['SUI','CMR','',''],['BRA','SRB','',''],['CMR','SRB','',''],['BRA','SUI','',''],['CMR','BRA','',''],['SRB','SUI','','']],
+    'H' : [['URU','KOR','',''],['POR','GHA','',''],['KOR','GHA','',''],['POR','URU','',''],['KOR','POR','',''],['GHA','URU','','']]
+};
+
+let players =
+{
+    'Alok' :
+    {
+        'group' :
+        {
+            A: [[0,1],[0,2],[0,1],[1,1],[3,0],[2,1]],
+            B: [[3,0],[2,1],[2,0],[3,1],[1,2],[0,3]],
+            C: [[6,0],[1,2],[5,0],[3,1],[1,2],[0,3]],
+            D: [[3,0],[5,1],[1,2],[3,1],[0,5],[1,3]],
+			E: [[3,0],[3,1],[0,2],[2,3],[0,3],[2,3]],
+			F: [[0,3],[2,0],[3,0],[2,0],[1,2],[3,1]],
+			G: [[3,2],[3,1],[1,2],[3,1],[0,3],[0,1]],
+			H: [[2,0],[3,1],[1,1],[1,2],[0,2],[0,3]]
+        }
+    },
+    'Amy' :
+    {
+        'group' :
+        {
+			A: [[0,1],[1,2],[1,1],[1,1],[2,0],[1,1]],
+			B: [[2,0],[1,1],[1,0],[2,1],[1,2],[1,1]],
+			C: [[2,0],[2,0],[1,1],[1,1],[1,2],[0,1]],
+			D: [[2,0],[2,1],[1,1],[1,2],[1,2],[1,1]],
+			E: [[2,1],[1,1],[1,1],[1,1],[1,2],[1,2]],
+			F: [[1,2],[1,1],[1,0],[2,1],[1,1],[1,1]],
+			G: [[2,1],[2,0],[1,1],[2,1],[1,2],[1,1]],
+			H: [[1,1],[1,0],[1,1],[1,2],[1,1],[1,1]]
+        }
+    },
+    'Tanish' :
+    {
+        'group' :
+        {
+			A: [[1,3],[2,9],[1,2],[2,2],[3,1],[1,2]],
+			B: [[5,1],[2,1],[5,0],[4,1],[1,3],[0,10]],
+			C: [[7,0],[1,2],[2,0],[2,1],[1,2],[0,3]],
+			D: [[2,0],[3,1],[2,1],[0,0],[5,126],[1,2]],
+			E: [[2,1],[3,0],[2,1],[3,2],[1,3],[1,2]],
+			F: [[8,4],[7,3],[3,1],[1,1],[0,81],[1,1]],
+			G: [[2,1],[878,0],[91,6],[756,2],[2,81],[1,3]],
+			H: [[2,0],[2,0],[2,0],[1,1],[0,2],[1,3]]
+        }
+    },
+    'Ahren' :
+    {
+        'group' :
+        {
+			A: [[0,2],[1,2],[1,3],[1,0],[4,1],[1,3]],
+			B: [[3,0],[0,0],[1,1],[0,0],[1,2],[0,4]],
+			C: [[5,0],[1,2],[2,2],[2,0],[1,2],[0,3]],
+			D: [[3,1],[1,2],[1,0],[2,1],[2,3],[1,1]],
+			E: [[4,1],[0,0],[1,1],[3,2],[0,3],[1,3]],
+			F: [[1,3],[4,0],[1,1],[0,0],[0,2],[1,1]],
+			G: [[2,1],[3,0],[0,1],[2,1],[1,5],[2,1]],
+			H: [[3,1],[1,1],[2,1],[0,0],[0,3],[2,1]]
+        }
+    },
+    'Ravi' :
+    {
+        'group' :
+        {
+			A: [[1,1],[1,1],[1,2],[2,1],[2,0],[1,1]],
+			B: [[3,0],[2,1],[1,0],[2,2],[0,1],[1,2]],
+			C: [[3,0],[1,2],[2,1],[2,1],[2,2],[1,1]],
+			D: [[2,1],[3,1],[2,1],[2,2],[1,3],[1,1]],
+			E: [[2,0],[3,1],[1,2],[3,2],[0,2],[0,1]],
+			F: [[2,2],[5,1],[2,1],[3,1],[2,2],[1,2]],
+			G: [[1,1],[3,0],[2,2],[2,1],[0,2],[1,3]],
+			H: [[1,1],[3,1],[1,0],[2,1],[1,3],[2,2]]
+        }
+    }
+};
+
+$(document).ready(main);
+
+function main()
+{
+    for(const player in players)
+    {
+        console.log("Adding player", player);
+        players[player].points = players[player].points || 0;
+        $('#playertables').append(`<h1>${player}</h1>`);
+        for(const group in players[player].group)
+            $('#playertables').append(get_player_group_html(player, group));
+        $('#playertables').append("<br clear='all'>");
+        $('#playertables').append(`<h2>POINTS: ${players[player].points}</h2>`);
+    }
+}
+
+function get_player_group_html(player, group)
+{
+    console.log("Adding group", group, "for player", player);
+    let html = "<table class='grouptable' cellspacing=0>";
+    html += `<tr><td class='groupheader' colspan=4>${group}</td>`;
+    for(let i=0; i < 6; i++)
+    {
+        let playergame = players[player].group[group][i];
+        let goals1 = groups[group][i][2];
+        let goals2 = groups[group][i][3];
+        let res_class = 'resnone';
+        let goals_class = 'goalnone';
+        if( goals1 !== '' && goals2 !== '' )
+        {
+            if( (goals1 > goals2 && playergame[0] > playergame[1]) ||
+                (goals1 < goals2 && playergame[0] < playergame[1]) ||
+                (goals1 == goals2 && playergame[0] == playergame[1]) )
+            {
+                res_class = 'resright';
+                players[player].points++;
+            }
+            else
+                res_class = 'reswrong';
+
+            if( goals1 === playergame[0] && goals2 === playergame[1] )
+            {
+                console.log("Right goals", playergame[0], playergame[1]);
+                goals_class = 'goalsright';
+                players[player].points++;
+            }
+            else
+                goals_class = 'goalswrong';
+        }
+        html += `
+            <tr>
+                <td class='${res_class}'>${groups[group][i][0]}</td>
+                <td class='${res_class} ${goals_class}'>${playergame[0]}-${playergame[1]}</td>
+                <td class='${res_class}'>${goals1}-${goals2}</td>
+                <td class='${res_class}'>${groups[group][i][1]}</td>
+            </tr>
+        `;
+    }
+    html += `</table>`;
+    return(html);
+}
+
+</script>
+
+</head>
+
+<body>
+
+    <div id='playertables'>
+    </div>
+
+</body>
+
+</html>
+

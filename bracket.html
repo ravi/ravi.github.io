@@ -11,13 +11,15 @@ BODY
     padding: 20px;
 }
 
+#groupstandings,
 .playerbox
 {
     padding-top: 25px;
     padding-bottom: 30px;
     border-bottom: 2px solid #d30;
 }
-.playername
+
+.sectionhead
 {
     float: left;
     color: #07d;
@@ -103,7 +105,7 @@ let players =
             A: [[0,2],[0,2],[1,3],[1,1],['',''],['','']],
             B: [[6,2],[1,1],[0,2],[0,0],['',''],['','']],
             C: [[1,2],[0,0],[2,0],['',''],['',''],['','']],
-            D: [[0,0],[4,1],[0,1],['',''],['',''],['','']],
+            D: [[0,0],[4,1],[0,1],[2,1],['',''],['','']],
 			E: [[1,2],[7,0],['',''],['',''],['',''],['','']],
 			F: [[0,0],[1,0],['',''],['',''],['',''],['','']],
 			G: [[1,0],[2,0],['',''],['',''],['',''],['','']],
@@ -205,7 +207,7 @@ function get_player_html(player)
 
     html = `
         <div class='playerbox'>
-            <div class='playername'>${player}</div>` +
+            <div class='sectionhead'>${player}</div>` +
             ((player === 'Actual') ?
              `` : `<div class='points'>${players[player].points} points</div>`) + `
             <br clear='all'><br>
@@ -264,28 +266,65 @@ function get_player_group_html(player, group)
 
 function group_standings()
 {
-    let html = '';
-    let results = { };
+    console.log("Generating group standings...");
 
-    /*
     for( group in groups )
     {
+        console.log(`Calculating standings for group ${group}...`);
         // A : [['QAT','ECU'],['SEN','NED'],['QAT','SEN'],['NED','ECU'],['NED','QAT'],['ECU','SEN']],
-        result[group]
+        let standing = { };
         for(let i = 0; i < 6; i++)
-        players.Actual.group[group].forEach(
-            {
-                if( game[0] === '' )
-                    return;
+        {
+            let game = players.Actual.group[group][i];
+            let team1 = groups[group][i][0];
+            let team2 = groups[group][i][1];
 
-                let team1 = groups[group]
-                results[]
-                html += `${group} ${game} <br>`;
+            standing[team1] = standing[team1] || { points: 0, gd : 0 };
+            standing[team2] = standing[team2] || { points: 0, gd : 0 };
+
+            if( game[0] === '' )
+                continue;
+
+            if( game[0] > game[1] )
+                standing[team1].points += 3;
+            else if( game[0] < game[1] )
+                standing[team2].points += 3;
+            else
+            {
+                standing[team1].points += 1;
+                standing[team2].points += 1;
             }
-        );
+
+            standing[team1].gd += game[0] - game[1];
+            standing[team2].gd += game[1] - game[0];
+        }
+
+        console.log(`Generating HTML for standings for group ${group}...`);
+        let html = `
+             <table class='grouptable' cellspacing=0>
+                <tr><td class='groupheader' colspan=3>${group}</td>
+                <tr>
+                    <td class='groupheader'>Team</td>
+                    <td class='groupheader'>Points</td>
+                    <td class='groupheader'>GD</td>
+                </tr>`;
+        for( team in standing )
+        {
+            console.log(`Standing for team ${team}, points = ${standing[team]}`);
+            html += `
+                <tr>
+                    <td>${team}</td>
+                    <td>${standing[team].points}</td>
+                    <td>${standing[team].gd}</td>
+                </tr>
+            `;
+        }
+        html += `</table>`;
+        console.log("HTML for group ${group}:\n", html);
+        $('#groupstandings').append(html);
     }
-    $('#groupstandings').append(html);
-    */
+
+    $('#groupstandings').append(`<br clear='all'>`);
 }
 
 </script>
@@ -295,6 +334,8 @@ function group_standings()
 <body>
 
     <div id='groupstandings'>
+        <div class='sectionhead'>Standings</div>
+        <br clear='all'>
     </div>
 
     <div id='playertables'>

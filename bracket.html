@@ -109,7 +109,7 @@ let players =
 			E: [[1,2],[7,0],[0,1],[1,1],['',''],['','']],
 			F: [[0,0],[1,0],[0,2],[4,1],['',''],['','']],
 			G: [[1,0],[2,0],[3,3],['',''],['',''],['','']],
-			H: [[0,0],[3,2],['',''],['',''],['',''],['','']]
+			H: [[0,0],[3,2],[2,3],['',''],['',''],['','']]
         }
     },
     Alok :
@@ -194,8 +194,13 @@ function main()
     {
         console.log("Adding player", player);
         players[player].points = players[player].points || 0;
-        $('#playertables').append(get_player_html(player));
+        players[player].html = get_player_html(player);
     }
+
+    players.Actual.points = 10000; // hack to make Actual appear first
+    Object.keys(players).sort((a, b) => players[b].points - players[a].points).forEach(
+        player => $('#playertables').append(players[player].html)
+    );
 }
 
 function get_player_html(player)

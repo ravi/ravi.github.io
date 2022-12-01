@@ -11,7 +11,6 @@ BODY
     padding: 20px;
 }
 
-#groupstandings,
 .playerbox
 {
     padding-top: 25px;
@@ -142,18 +141,10 @@ let players =
             C: [ [1,2],[0,0],[2,0],[2,0],[0,2],[1,2] ],
             D: [ [0,0],[4,1],[0,1],[2,1],[1,0],[1,0] ],
 			E: [ [1,2],[7,0],[0,1],[1,1] ],
-			F: [ [0,0],[1,0],[0,2],[4,1] ],
+			F: [ [0,0],[1,0],[0,2],[4,1],[0,0],[1,2] ],
 			G: [ [1,0],[2,0],[3,3],[1,0] ],
 			H: [ [0,0],[3,2],[2,3],[2,0] ]
         },
-        knockout:
-        [
-            { draw: [], scores: [] },
-            { draw: [], scores: [] },
-            { draw: [], scores: [] },
-            { draw: [], scores: [] },
-            { draw: [], scores: [] }
-        ]
     },
     Alok :
     {
@@ -170,7 +161,15 @@ let players =
         },
         knockout :
         [
-
+            {
+                draw:   [['NED','USA'],['ARG','DEN'],['GER','CRO'],['BRA','POR'],
+                         ['ENG','ECU'],['FRA','POL'],['BEL','ESP'],['POR','SUI']],
+                scores: [[1,2],[3,1],[2,1],[2,0],[1,2],[2,0],[0,1],[1,0]]
+            },
+            { scores: [[1,3],[1,2],[0,3],[2,1]] },
+            { scores: [[6,7],[6,4]] },
+            { scores: [[3,0]] },
+            { scores: [[2,1]] }
         ]
     },
     Amy :
@@ -188,7 +187,11 @@ let players =
         },
         knockout :
         [
-
+            { scores: [[2,1],[2,1],[2,1],[3,1],[3,1],[1,0],[1,0],[2,1],[1,2]] },
+            { scores: [[2,1],[1,2],[1,2],[2,1] ]},
+            { scores: [[2,3],[2,1]] },
+            { scores: [[2,1]] },
+            { scores: [[1,2]] }
         ]
     },
     Tanish :
@@ -206,7 +209,11 @@ let players =
         },
         knockout :
         [
-
+            { scores: [[2,1],[3,1],[0,3],[3,1],[2,1],[0,2],[4,0],[2,1]] },
+            { scores: [[2,1],[0,5],[2,1],[1,0]] },
+            { scores: [[0,3],[1,3]] },
+            { scores: [[0,4]] },
+            { scores: [[8,0]] }
         ]
     },
     Ahren :
@@ -224,27 +231,11 @@ let players =
         },
         knockout :
         [
-            {
-                draw:   [['NED','USA'],['ARG','DEN'],['ESP','CRO'],['BRA','URU'],
-                         ['ENG','SEN'],['FRA','POL'],['BEL','GER'],['POR','SRB']],
-                scores: [[2,0],[3,0],[6,4],[3,1],[5,4],[0,1],[1,2],[2,0]]
-            },
-            {
-                draw:   [['NED','ARG'],['ESP','BRA'],['ENG','POL'],['GER','POR']],
-                scores: [[2,3],[1,2],[1,0],[2,0]]
-            },
-            {
-                draw:   [['ARG','BRA'],['ENG','GER']],
-                scores: [[0,1],[1,2]]
-            },
-            {
-                draw:   [['ARG','ENG']],
-                scores: [[2,0]]
-            },
-            {
-                draw:   [['BRA','GER']],
-                scores: [[2,0]]
-            }
+            { scores: [[2,0],[3,0],[6,4],[3,1],[5,4],[0,1],[1,2],[2,0]] },
+            { scores: [[2,3],[1,2],[1,0],[2,0]] },
+            { scores: [[0,1],[1,2]] },
+            { scores: [[2,0]] },
+            { scores: [[2,0]] }
         ]
     },
     Ravi :
@@ -262,44 +253,35 @@ let players =
         },
         knockout :
         [
-
+            { scores: [[3,0],[2,1],[7,5],[3,0],[2,0],[2,1],[0,1],[2,0]] },
+            { scores: [[1,0],[1,2],[2,1],[2,0]] },
+            { scores: [[0,3],[1,0]] },
+            { scores: [[0,2]] },
+            { scores: [[2,1]] }
         ]
     }
 };
-
-let standings = { };
-let ordered_groups = { };
 
 $(document).ready(main);
 
 function main()
 {
-    group_standings();
-    order_groups();
-
-    group_standings_html();
-
-    players.Actual.knockout[0].draw.push([ordered_groups.A[0], ordered_groups.B[1]]);
-    players.Actual.knockout[0].draw.push([ordered_groups.C[0], ordered_groups.D[1]]);
-    players.Actual.knockout[0].draw.push([ordered_groups.E[0], ordered_groups.F[1]]);
-    players.Actual.knockout[0].draw.push([ordered_groups.G[0], ordered_groups.H[1]]);
-    players.Actual.knockout[0].draw.push([ordered_groups.B[0], ordered_groups.A[1]]);
-    players.Actual.knockout[0].draw.push([ordered_groups.D[0], ordered_groups.C[1]]);
-    players.Actual.knockout[0].draw.push([ordered_groups.F[0], ordered_groups.E[1]]);
-    players.Actual.knockout[0].draw.push([ordered_groups.H[0], ordered_groups.G[1]]);
-
     for(const player in players)
     {
-        console.log("Adding player", player);
+        console.log("Computing for player", player);
         players[player].points = players[player].points || 0;
+        calc_group_standings(player);
+        order_groups(player);
+        calc_knockout(player);
         players[player].html = get_player_html(player);
     }
 
     players.Actual.points = 10000; // hack to make Actual appear first
-    Object.keys(players).sort((a, b) => players[b].points - players[a].points).forEach(
-        player => $('#playertables').append(players[player].html)
-    );
+    Object.keys(players)
+        .sort((a, b) => players[b].points - players[a].points)
+        .forEach(player => $('#playertables').append(players[player].html));
 
+    /*
     let lopts =
     {
         size: 2,
@@ -315,7 +297,6 @@ function main()
         endSocket: 'left'
     };
 
-    /*
     new LeaderLine(document.getElementById('k00'), document.getElementById('k10'), lopts);
     new LeaderLine(document.getElementById('k01'), document.getElementById('k10'), lopts);
     lopts.endSocket = 'top';
@@ -324,9 +305,12 @@ function main()
     */
 }
 
-function group_standings()
+function calc_group_standings(player)
 {
     console.log("Generating group standings...");
+
+    let standings = { };
+    players[player].standings = standings;
 
     for(let group in groups)
     {
@@ -335,7 +319,7 @@ function group_standings()
         let template = { points: 0, gd: 0, gf: 0, ga: 0, wins: 0, losses: 0, draws: 0 };
         for(let i = 0; i < 6; i++)
         {
-            let game = players.Actual.group[group][i] || ['', ''];
+            let game = players[player].group[group][i] || ['', ''];
             let team1 = groups[group][i][0];
             let team2 = groups[group][i][1];
 
@@ -375,52 +359,127 @@ function group_standings()
     }
 }
 
-function order_groups()
+function order_groups(player)
 {
+    console.log("Sorting groups for player", player);
+    let ordered_groups = { };
+    players[player].ordered_groups = ordered_groups;
     for(let group in groups)
     {
-        let standing = standings[group];
-        let team_order = Object.keys(standings[group]);
-        console.log("Pre sort\n", team_order);
+        let standing = players[player].standings[group];
+        let team_order = Object.keys(standing);
         team_order.sort(
             (a, b) =>
             {
-                console.log("Comparing", a, b);
                 return (standing[b].points - standing[a].points) ||
                         (standing[b].gd - standing[a].gd) ||
                         (standing[b].gf - standing[a].gf) ||
                         -1;    // hack for NED ECU, since we do not know fair play numbers
             }
         );
-        console.log("Post sort\n", team_order);
         ordered_groups[group] = team_order;
+    }
+}
+
+function calc_knockout(player)
+{
+    let ordered_groups = players[player].ordered_groups;
+    players[player].knockout = players[player].knockout || [ ];
+    let knockout = players[player].knockout;
+
+    // round of 16
+    knockout[0] = knockout[0] || { };
+    knockout[0].draw = [ ];
+    knockout[0].draw.push([ordered_groups.A[0], ordered_groups.B[1]]);
+    knockout[0].draw.push([ordered_groups.C[0], ordered_groups.D[1]]);
+    knockout[0].draw.push([ordered_groups.E[0], ordered_groups.F[1]]);
+    knockout[0].draw.push([ordered_groups.G[0], ordered_groups.H[1]]);
+    knockout[0].draw.push([ordered_groups.B[0], ordered_groups.A[1]]);
+    knockout[0].draw.push([ordered_groups.D[0], ordered_groups.C[1]]);
+    knockout[0].draw.push([ordered_groups.F[0], ordered_groups.E[1]]);
+    knockout[0].draw.push([ordered_groups.H[0], ordered_groups.G[1]]);
+
+    get_knockout_draws(player, 1, 0, 'winner');
+    get_knockout_draws(player, 2, 1, 'winner');
+    get_knockout_draws(player, 3, 2, 'loser');
+    get_knockout_draws(player, 4, 2, 'winner');
+
+    /*
+    let actual_ko = players.Actual.knockout;
+    if( player !== 'Actual' )
+    {
+        for(let i=0; i < knockout.length; i++ )
+        {
+            if( ! actual_ko[i] )
+                continue;
+
+            for(let j=0; j < knockout[i].draw.length; j++ )
+            {
+                console.log("For round", i, "game", j, "actual teams", actual_ko[i].draw[j]);
+                console.log("Calculating player points using picks", knockout[i].draw[j]);
+                console.log("Points before", players[player].points);
+                if( knockout[i].draw[j][0] === actual_ko[i].draw[j][0] )
+                    players[player].points++;
+                if( knockout[i].draw[j][1] === actual_ko[i].draw[j][1] )
+                    players[player].points++;
+                console.log("Points after", players[player].points);
+            }
+        }
+    }
+    */
+
+    console.log("KNOCKOUT for player", player, "is", knockout);
+}
+
+function get_knockout_draws(player, round, prev, pick)
+{
+    console.log("Calculating knockout stage", round, "for player", player);
+
+    let knockout = players[player].knockout;
+    if( ! knockout[prev] || ! knockout[prev].scores )
+        return;
+
+    knockout[round] = knockout[round] || { };
+    knockout[round].draw = [ ];
+    for(let j=0; j < knockout[prev].draw.length - 1; j += 2)
+    {
+        let k = knockout[prev];
+        let pick1 = k.scores[j][0] > k.scores[j][1] ?
+                    (pick === 'winner' ? k.draw[j][0] : k.draw[j][1]) :
+                    (pick === 'loser' ? k.draw[j][0] : k.draw[j][1]);
+        let pick2 = k.scores[j+1][0] > k.scores[j+1][1] ?
+                    (pick === 'winner' ? k.draw[j+1][0] : k.draw[j+1][1]) :
+                    (pick === 'loser' ? k.draw[j+1][0] : k.draw[j+1][1]);
+        knockout[round].draw.push([pick1, pick2]);
     }
 }
 
 function get_player_html(player)
 {
-    let group_html = '';
+    let group_result_html = '';
 
     for(const group in players[player].group)
-        group_html += get_player_group_html(player, group);
+        group_result_html += get_group_result_html(player, group);
 
     html = `
         <div class='playerbox'>
             <div class='sectionhead'>${player}</div>` +
             ((player === 'Actual') ?
              `` : `<div class='points'>${players[player].points} points</div>`) + `
-            <br clear='all'><br>
-            <h3>Group</h3>` +
-            group_html + `
             <br clear='all'>
-            <h3>Knockout</h3>` +
-            get_player_knockout_html(player) + `
-        </div>`;
+            <h3>Group Results</h3>
+            ${group_result_html}
+            <br clear='all'>
+            <h3>Group Standings</h3>` +
+            get_group_standings_html(player) +
+            `<h3>Knockout</h3>` +
+            get_knockout_html(player) +
+        `</div>`;
 
     return(html);
 }
 
-function get_player_group_html(player, group)
+function get_group_result_html(player, group)
 {
     console.log("Adding group", group, "for player", player);
     let html = "<table class='grouptable' cellspacing=0>";
@@ -467,23 +526,67 @@ function get_player_group_html(player, group)
     return(html);
 }
 
-function get_player_knockout_html(player)
+function get_group_standings_html(player)
+{
+    let html = '';
+    console.log("Generating group standings HTML for player", player);
+    for(let group in groups )
+    {
+        console.log(`... for group ${group}...`);
+        html += `
+             <table class='grouptable' cellspacing=0>
+                <tr><td class='groupheader' colspan=8>${group}</td>
+                <tr>
+                    <td class='groupheader'>Team</td>
+                    <td class='groupheader'>Pts</td>
+                    <td class='groupheader'>W</td>
+                    <td class='groupheader'>D</td>
+                    <td class='groupheader'>L</td>
+                    <td class='groupheader'>GF</td>
+                    <td class='groupheader'>GA</td>
+                    <td class='groupheader'>GD</td>
+                </tr>`;
+
+        let standings = players[player].standings;
+
+        for(let i = 0; i < 4; i++)
+        {
+            let team = players[player].ordered_groups[group][i];
+            html += `
+                <tr>
+                    <td><b>${team}</b></td>
+                    <td><b>${standings[group][team].points}</b></td>
+                    <td>${standings[group][team].wins}</td>
+                    <td>${standings[group][team].draws}</td>
+                    <td>${standings[group][team].losses}</td>
+                    <td>${standings[group][team].gf}</td>
+                    <td>${standings[group][team].ga}</td>
+                    <td>${standings[group][team].gd}</td>
+                </tr>
+            `;
+        }
+        html += `</table>`;
+    }
+
+    html += `<br clear='all'>`;
+    return(html);
+}
+
+function get_knockout_html(player)
 {
     let html = `<table class='knockout' cellspacing=0>`;
-    for(let i=0; i < 5; i++)
+    for(let i=0; i < players[player].knockout.length; i++)
     {
         let knockout = players[player].knockout[i];
-        console.log("KNOCKOUT FOR", player, "IS", knockout);
-        if( ! knockout) continue; // TODO remove
+        if( ! knockout)
+            continue;
         html += `<tr>`;
         let filler = ((8 - knockout.draw.length)/2)*5;
         if( filler > 0 )
             html += `<td colspan='${filler}'></td>`;
         for(let j=0; j < knockout.draw.length; j++ )
         {
-            let scores = knockout.scores[j];
-            if( ! scores )
-                continue;
+            let scores = knockout.scores ? knockout.scores[j] :  [ '', '' ];
             /*
             if( j < i || j > 16 - i )
                 html += `<td>-</td><td>-</td>`;
@@ -510,62 +613,11 @@ function get_player_knockout_html(player)
     return(html);
 }
 
-function group_standings_html()
-{
-    console.log("Generating group standings...");
-
-    for(let group in groups )
-    {
-        console.log(`Generating HTML for standings for group ${group}...`);
-        let html = `
-             <table class='grouptable' cellspacing=0>
-                <tr><td class='groupheader' colspan=8>${group}</td>
-                <tr>
-                    <td class='groupheader'>Team</td>
-                    <td class='groupheader'>Pts</td>
-                    <td class='groupheader'>W</td>
-                    <td class='groupheader'>D</td>
-                    <td class='groupheader'>L</td>
-                    <td class='groupheader'>GF</td>
-                    <td class='groupheader'>GA</td>
-                    <td class='groupheader'>GD</td>
-                </tr>`;
-
-        for(let i = 0; i < 4; i++)
-        {
-            let team = ordered_groups[group][i];
-            console.log(`Standing for team ${team}, points = ${standings[group][team]}`);
-            html += `
-                <tr>
-                    <td><b>${team}</b></td>
-                    <td><b>${standings[group][team].points}</b></td>
-                    <td>${standings[group][team].wins}</td>
-                    <td>${standings[group][team].draws}</td>
-                    <td>${standings[group][team].losses}</td>
-                    <td>${standings[group][team].gf}</td>
-                    <td>${standings[group][team].ga}</td>
-                    <td>${standings[group][team].gd}</td>
-                </tr>
-            `;
-        }
-        html += `</table>`;
-        console.log("HTML for group ${group}:\n", html);
-        $('#groupstandings').append(html);
-    }
-
-    $('#groupstandings').append(`<br clear='all'>`);
-}
-
 </script>
 
 </head>
 
 <body>
-
-    <div id='groupstandings'>
-        <div class='sectionhead'>Group Standings</div>
-        <br clear='all'>
-    </div>
 
     <div id='playertables'>
     </div>

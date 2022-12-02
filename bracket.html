@@ -11,6 +11,11 @@ BODY
     padding: 20px;
 }
 
+H3
+{
+    color: #449999;
+}
+
 .playerbox
 {
     padding-top: 25px;
@@ -66,13 +71,15 @@ BODY
     background-color: #ffdddd;
 }
 
-.goalsright
+.goalsright,
+.teamright
 {
     color: #009900;
-    font-weight: bold;
+    /*font-weight: bold;*/
 }
 
-.goalswrong
+.goalswrong,
+.teamwrong
 {
     color: #ff5555;
 }
@@ -80,20 +87,38 @@ BODY
 .knockout
 {
     clear: both;
-    margin-top: 30px;
-}
-
-.knockout TD
-{
-    padding: 2px 0px;
+    width: 100%;
     text-align: center;
 }
 
-
-TD.teambox,
-TD.goalbox
+.korow
 {
-    border: 1px solid #ddd;
+    display: inline-block;
+    clear: both;
+    margin: 20 auto;
+}
+
+.teambox,
+.goalbox,
+.filler
+{
+    float: left;
+    height: 20px;
+}
+
+.teambox,
+.goalbox
+{
+    border: 1px solid #333;
+    border-left: 0px none;
+    padding: 2px 0px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.team1box
+{
+    border-left: 1px solid #333 !important;
 }
 
 .teambox
@@ -108,7 +133,7 @@ TD.goalbox
 
 .filler
 {
-    width: 40px;
+    width: 20px;
 }
 
 </style>
@@ -279,30 +304,13 @@ function main()
     players.Actual.points = 10000; // hack to make Actual appear first
     Object.keys(players)
         .sort((a, b) => players[b].points - players[a].points)
-        .forEach(player => $('#playertables').append(players[player].html));
-
-    /*
-    let lopts =
-    {
-        size: 2,
-        color: '#ef1e28',
-        startPlug: 'disc',
-        endPlug: 'arrow2',
-        startPlugColor: '#43bc5b',
-        endPlugColor: '#1085e0',
-        startPlugSize: 1.5,
-        endPlugSize: 1.5,
-        path: 'grid',
-        startSocket: 'bottom',
-        endSocket: 'left'
-    };
-
-    new LeaderLine(document.getElementById('k00'), document.getElementById('k10'), lopts);
-    new LeaderLine(document.getElementById('k01'), document.getElementById('k10'), lopts);
-    lopts.endSocket = 'top';
-    new LeaderLine(document.getElementById('k02'), document.getElementById('k11'), lopts);
-    new LeaderLine(document.getElementById('k03'), document.getElementById('k11'), lopts);
-    */
+        .forEach(
+            player =>
+            {
+                $('#playertables').append(players[player].html);
+                draw_knockout_lines(player);
+            }
+        );
 }
 
 function calc_group_standings(player)
@@ -470,9 +478,9 @@ function get_player_html(player)
             <h3>Group Results</h3>
             ${group_result_html}
             <br clear='all'>
-            <h3>Group Standings</h3>` +
+            <br><h3>Group Standings</h3>` +
             get_group_standings_html(player) +
-            `<h3>Knockout</h3>` +
+            `<br><h3>Knockout</h3>` +
             get_knockout_html(player) +
         `</div>`;
 
@@ -574,43 +582,84 @@ function get_group_standings_html(player)
 
 function get_knockout_html(player)
 {
-    let html = `<table class='knockout' cellspacing=0>`;
+    let html = `<div class='knockout'>`;
     for(let i=0; i < players[player].knockout.length; i++)
     {
         let knockout = players[player].knockout[i];
         if( ! knockout)
             continue;
-        html += `<tr>`;
-        let filler = ((8 - knockout.draw.length)/2)*5;
-        if( filler > 0 )
-            html += `<td colspan='${filler}'></td>`;
+        let actual_ko = players.Actual.knockout[i];
+        html += `<div class='korow'>`;
         for(let j=0; j < knockout.draw.length; j++ )
         {
+            let team1 = knockout.draw[j][0];
+            let team2 = knockout.draw[j][1];
             let scores = knockout.scores ? knockout.scores[j] :  [ '', '' ];
-            /*
-            if( j < i || j > 16 - i )
-                html += `<td>-</td><td>-</td>`;
-            else if( (j - i) % 2 === 0 )
-            {
-            */
-                html += `
-                    <td id='k${i}${j}' class='teambox'>${knockout.draw[j][0]}</td>
-                    <td class='goalbox'>${scores[0]}</td>
-                    <td class='goalbox'>${scores[1]}</td>
-                    <td class='teambox'>${knockout.draw[j][1]}</td>
-                    <td class='filler'></td>
-                `;
-            /*
-            }
-            else
-                html += `<td class>-</td><td>-</td>`;
-            */
-        }
-        html += `</tr><tr><td style='height:50px;'></td></tr>`;
-    }
 
-    html += `</table>`;
+            let tclass1 = '', tclass2 = '';
+            if( player !== 'Actual' && actual_ko && actual_ko.draw && actual_ko.draw[j] )
+            {
+                tclass1 = team1 === actual_ko.draw[j][0] ? 'teamright' : 'teamwrong';
+                tclass2 = team2 === actual_ko.draw[j][1] ? 'teamright' : 'teamwrong';
+            }
+
+            //let fillerwidth = i*150 + (i+1)*20;
+            let fillerwidth = i*170 + Math.max((i-1)*150, 0) + 20;
+            //let fillerwidth = i > 0 ? 60 : 20;
+            if( j !== 0 )
+                html += `<div class='filler' style='width: ${fillerwidth}'></div>`;
+
+            html += `
+                <div class='teambox team1box ${tclass1}'>${team1}</div>
+                <div class='goalbox'>${scores[0]}</div>
+                <div id='${player}k${i}${j}' class='goalbox'>${scores[1]}</div>
+                <div class='teambox ${tclass2}'>${team2}</div>
+            `;
+        }
+        html += `<br clear=all></div><br>`;
+    }
+    html += `</div><br clear='all'>`;
+
     return(html);
+}
+
+function draw_knockout_lines(player)
+{
+    let lopts =
+    {
+        size: 1,
+        color: '#777',
+        dash: true,
+        endPlug: 'arrow2',
+        startPlugSize: 1.5,
+        endPlugSize: 1.5,
+        path: 'grid',
+        startSocket: 'bottom',
+        endSocket: 'top'
+    };
+    for( let i=0; i < 3; i++ )
+    {
+        if( ! players[player].knockout[i+1] )
+            break;
+        for( let j=0; j < players[player].knockout[i].draw.length; j++ )
+        {
+            let tgt = Math.floor(j/2);
+            lopts.startSocketGravity = 10;
+            lopts.endSocketGravity = 10;
+            new LeaderLine(
+                LeaderLine.pointAnchor(document.getElementById(`${player}k${i}${j}`), { x: 0, y: 25 }),
+                LeaderLine.pointAnchor(document.getElementById(`${player}k${i+1}${tgt}`), { x: 0, y: 0 }),
+                lopts);
+            if( i != 2 )
+                continue;
+            lopts.startSocketGravity = 65;
+            lopts.endSocketGravity = 0;
+            new LeaderLine(
+                LeaderLine.pointAnchor(document.getElementById(`${player}k${i}${j}`), { x: 0, y: 25 }),
+                LeaderLine.pointAnchor(document.getElementById(`${player}k${i+2}${tgt}`), { x: 0, y: 0 }),
+                lopts);
+        }
+    }
 }
 
 </script>

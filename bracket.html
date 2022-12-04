@@ -170,6 +170,10 @@ let players =
 			G: [ [1,0],[2,0],[3,3],[1,0],[1,0],[2,3] ],
 			H: [ [0,0],[3,2],[2,3],[2,0],[2,1],[0,2] ]
         },
+        knockout :
+        [
+            { scores: [[3,1],[2,1],['',''],['',''],[3,0],[3,1]] }
+        ]
     },
     Alok :
     {
@@ -212,7 +216,7 @@ let players =
         },
         knockout :
         [
-            { scores: [[2,1],[2,1],[2,1],[3,1],[3,1],[1,0],[1,0],[2,1],[1,2]] },
+            { scores: [[2,1],[2,1],[2,1],[3,1],[3,1],[1,0],[2,1],[1,2]] },
             { scores: [[2,1],[1,2],[1,2],[2,1] ]},
             { scores: [[2,3],[2,1]] },
             { scores: [[2,1]] },
@@ -412,7 +416,6 @@ function calc_knockout(player)
     get_knockout_draws(player, 3, 2, 'loser');
     get_knockout_draws(player, 4, 2, 'winner');
 
-    /*
     let actual_ko = players.Actual.knockout;
     if( player !== 'Actual' )
     {
@@ -423,6 +426,8 @@ function calc_knockout(player)
 
             for(let j=0; j < knockout[i].draw.length; j++ )
             {
+                if( ! actual_ko[i].draw[j] || actual_ko[i].draw[j][0] === '' )
+                    continue;
                 console.log("For round", i, "game", j, "actual teams", actual_ko[i].draw[j]);
                 console.log("Calculating player points using picks", knockout[i].draw[j]);
                 console.log("Points before", players[player].points);
@@ -434,7 +439,6 @@ function calc_knockout(player)
             }
         }
     }
-    /* */
 
     console.log("KNOCKOUT for player", player, "is", knockout);
 }
@@ -444,20 +448,27 @@ function get_knockout_draws(player, round, prev, pick)
     console.log("Calculating knockout stage", round, "for player", player);
 
     let knockout = players[player].knockout;
-    if( ! knockout[prev] || ! knockout[prev].scores )
+    let kprev = knockout[prev];
+    if( ! kprev || ! kprev.scores )
         return;
 
     knockout[round] = knockout[round] || { };
     knockout[round].draw = [ ];
-    for(let j=0; j < knockout[prev].draw.length - 1; j += 2)
+    for(let j=0; j < kprev.scores.length; j += 2)
     {
-        let k = knockout[prev];
-        let pick1 = k.scores[j][0] > k.scores[j][1] ?
-                    (pick === 'winner' ? k.draw[j][0] : k.draw[j][1]) :
-                    (pick === 'loser' ? k.draw[j][0] : k.draw[j][1]);
-        let pick2 = k.scores[j+1][0] > k.scores[j+1][1] ?
-                    (pick === 'winner' ? k.draw[j+1][0] : k.draw[j+1][1]) :
-                    (pick === 'loser' ? k.draw[j+1][0] : k.draw[j+1][1]);
+        console.log("*** COMPARING:", kprev.draw[j], kprev.scores[j]);
+        let pick1 = kprev.scores[j] && kprev.scores[j][0] !== '' ?
+                        (kprev.scores[j][0] > kprev.scores[j][1] ?
+                            (pick === 'winner' ? kprev.draw[j][0] : kprev.draw[j][1]) :
+                            (pick === 'loser' ? kprev.draw[j][0] : kprev.draw[j][1])) :
+                            '-';
+        console.log("*** COMPARING:", kprev.draw[j+1], kprev.scores[j+1]);
+        let pick2 = kprev.scores[j+1] && kprev.scores[j+1][0] !== '' ?
+                        (kprev.scores[j+1][0] > kprev.scores[j+1][1] ?
+                            (pick === 'winner' ? kprev.draw[j+1][0] : kprev.draw[j+1][1]) :
+                            (pick === 'loser' ? kprev.draw[j+1][0] : kprev.draw[j+1][1])) :
+                            '-';
+        console.log("Pushing", pick1, pick2);
         knockout[round].draw.push([pick1, pick2]);
     }
 }
@@ -594,7 +605,7 @@ function get_knockout_html(player)
         {
             let team1 = knockout.draw[j][0];
             let team2 = knockout.draw[j][1];
-            let scores = knockout.scores ? knockout.scores[j] :  [ '', '' ];
+            let scores = knockout.scores && knockout.scores[j] ? knockout.scores[j] :  [ '', '' ];
 
             let tclass1 = '', tclass2 = '';
             if( player !== 'Actual' && actual_ko && actual_ko.draw && actual_ko.draw[j] )
@@ -637,13 +648,17 @@ function draw_knockout_lines(player)
         startSocket: 'bottom',
         endSocket: 'top'
     };
+
+    let knockout = players[player].knockout;
     for( let i=0; i < 3; i++ )
     {
-        if( ! players[player].knockout[i+1] )
+        if( ! knockout[i+1] || ! knockout[i+1].draw )
             break;
-        for( let j=0; j < players[player].knockout[i].draw.length; j++ )
+        for( let j=0; j < knockout[i].scores.length; j++ )
         {
             let tgt = Math.floor(j/2);
+            if( ! knockout[i+1].draw[tgt] )
+                continue;
             lopts.startSocketGravity = 10;
             lopts.endSocketGravity = 10;
             new LeaderLine(

@@ -8,12 +8,37 @@
 BODY
 {
     font-family: Avenir, Montserrat, sans-serif;
+    width: 1300px !important;
     padding: 20px;
 }
 
 H3
 {
     color: #449999;
+}
+
+#leaderbox
+{
+    position: fixed;
+    right: 30;
+    top: 30;
+    border: 1px solid #d30;
+    box-shadow: 0 0 25px #ccc;
+    padding: 10px 20px;
+    background-color: #f8f8f8;
+}
+
+#leaderbox TD
+{
+    padding: 2px 5px;
+    border-top: 1px solid #d30;
+    color: #07d;
+    font-weight: 500;
+}
+
+#leaderbox TR:first-child TD
+{
+    border-top: none;
 }
 
 .playerbox
@@ -172,7 +197,7 @@ let players =
         },
         knockout :
         [
-            { scores: [[3,1],[2,1],[2,4],[4,1],[3,0],[3,1]] }
+            { scores: [[3,1],[2,1],[2,4],[4,1],[3,0],[3,1],[3,0]] }
         ]
     },
     Alok :
@@ -313,6 +338,7 @@ function main()
             {
                 $('#playertables').append(players[player].html);
                 draw_knockout_lines(player);
+                add_to_leaderbox(player);
             }
         );
 }
@@ -677,6 +703,13 @@ function draw_knockout_lines(player)
     }
 }
 
+function add_to_leaderbox(player)
+{
+    if( player === 'Actual' )
+        return;
+    $('#leaderbox table').append(`<tr><td>${player}</td><td>${players[player].points}</td></tr>`);
+}
+
 </script>
 
 </head>
@@ -684,6 +717,11 @@ function draw_knockout_lines(player)
 <body>
 
     <div id='playertables'>
+    </div>
+
+    <div id='leaderbox'>
+        <table cellspacing=0>
+        </table>
     </div>
 
 </body>

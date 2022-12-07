@@ -323,7 +323,7 @@ function main()
     for(const player in players)
     {
         console.log("Computing for player", player);
-        players[player].points = players[player].points || 0;
+        players[player].points ||= 0;
         calc_group_standings(player);
         order_groups(player);
         calc_knockout(player);
@@ -353,7 +353,7 @@ function calc_group_standings(player)
     for(let group in groups)
     {
         console.log(`Calculating standings for group ${group}...`);
-        standings[group] = standings[group] || { };
+        standings[group] ||= { };
         let template = { points: 0, gd: 0, gf: 0, ga: 0, wins: 0, losses: 0, draws: 0 };
         for(let i = 0; i < 6; i++)
         {
@@ -361,8 +361,8 @@ function calc_group_standings(player)
             let team1 = groups[group][i][0];
             let team2 = groups[group][i][1];
 
-            standings[group][team1] = standings[group][team1] || { ...template };
-            standings[group][team2] = standings[group][team2] || { ...template };
+            standings[group][team1] ||= { ...template };
+            standings[group][team2] ||= { ...template };
 
             if( game[0] === '' )
                 continue;
@@ -422,11 +422,11 @@ function order_groups(player)
 function calc_knockout(player)
 {
     let ordered_groups = players[player].ordered_groups;
-    players[player].knockout = players[player].knockout || [ ];
+    players[player].knockout ||= [ ];
     let knockout = players[player].knockout;
 
     // round of 16
-    knockout[0] = knockout[0] || { };
+    knockout[0] ||= { };
     knockout[0].draw = [ ];
     knockout[0].draw.push([ordered_groups.A[0], ordered_groups.B[1]]);
     knockout[0].draw.push([ordered_groups.C[0], ordered_groups.D[1]]);
@@ -452,7 +452,7 @@ function calc_knockout(player)
 
             for(let j=0; j < knockout[i].draw.length; j++ )
             {
-                if( ! actual_ko[i].draw[j] || actual_ko[i].draw[j][0] === '' )
+                if( ! actual_ko[i].draw[j]?.[0] )
                     continue;
                 console.log("For round", i, "game", j, "actual teams", actual_ko[i].draw[j]);
                 console.log("Calculating player points using picks", knockout[i].draw[j]);
@@ -475,21 +475,21 @@ function get_knockout_draws(player, round, prev, pick)
 
     let knockout = players[player].knockout;
     let kprev = knockout[prev];
-    if( ! kprev || ! kprev.scores )
+    if( ! kprev?.scores )
         return;
 
-    knockout[round] = knockout[round] || { };
+    knockout[round] ||= { };
     knockout[round].draw = [ ];
     for(let j=0; j < kprev.scores.length; j += 2)
     {
         console.log("*** COMPARING:", kprev.draw[j], kprev.scores[j]);
-        let pick1 = kprev.scores[j] && kprev.scores[j][0] !== '' ?
+        let pick1 = kprev.scores?.[j] ?
                         (kprev.scores[j][0] > kprev.scores[j][1] ?
                             (pick === 'winner' ? kprev.draw[j][0] : kprev.draw[j][1]) :
                             (pick === 'loser' ? kprev.draw[j][0] : kprev.draw[j][1])) :
                             '-';
         console.log("*** COMPARING:", kprev.draw[j+1], kprev.scores[j+1]);
-        let pick2 = kprev.scores[j+1] && kprev.scores[j+1][0] !== '' ?
+        let pick2 = kprev.scores?.[j+1] ?
                         (kprev.scores[j+1][0] > kprev.scores[j+1][1] ?
                             (pick === 'winner' ? kprev.draw[j+1][0] : kprev.draw[j+1][1]) :
                             (pick === 'loser' ? kprev.draw[j+1][0] : kprev.draw[j+1][1])) :
@@ -631,18 +631,16 @@ function get_knockout_html(player)
         {
             let team1 = knockout.draw[j][0];
             let team2 = knockout.draw[j][1];
-            let scores = knockout.scores && knockout.scores[j] ? knockout.scores[j] :  [ '', '' ];
+            let scores =  knockout.scores?.[j] ?? [ '', '' ];
 
             let tclass1 = '', tclass2 = '';
-            if( player !== 'Actual' && actual_ko && actual_ko.draw && actual_ko.draw[j] )
+            if( player !== 'Actual' && actual_ko?.draw?.[j] )
             {
                 tclass1 = team1 === actual_ko.draw[j][0] ? 'teamright' : 'teamwrong';
                 tclass2 = team2 === actual_ko.draw[j][1] ? 'teamright' : 'teamwrong';
             }
 
-            //let fillerwidth = i*150 + (i+1)*20;
             let fillerwidth = i*170 + Math.max((i-1)*150, 0) + 20;
-            //let fillerwidth = i > 0 ? 60 : 20;
             if( j !== 0 )
                 html += `<div class='filler' style='width: ${fillerwidth}'></div>`;
 
@@ -678,7 +676,7 @@ function draw_knockout_lines(player)
     let knockout = players[player].knockout;
     for( let i=0; i < 3; i++ )
     {
-        if( ! knockout[i+1] || ! knockout[i+1].draw )
+        if( ! knockout[i+1]?.draw )
             break;
         for( let j=0; j < knockout[i].scores.length; j++ )
         {
